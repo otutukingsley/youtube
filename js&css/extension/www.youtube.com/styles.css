@@ -42,47 +42,32 @@ html {overflow-x: hidden !important}
 /*------------------------------------------------------------------------------
 4.0 PLAYER
 ------------------------------------------------------------------------------*/
-
 /*------------------------------------------------------------------------------
 4.1 CROP CHAPTER TITLES
 ------------------------------------------------------------------------------*/
 html[it-player-crop-chapter-titles=false] .ytp-chapter-title {
 	width: auto !important;
 }
-
 /*------------------------------------------------------------------------------
-4.2 ADS
+4.2 BANNER ADS
 ------------------------------------------------------------------------------*/
-html[it-ads=subscribed_channels] #related #player-ads,
-html[it-ads=subscribed_channels] #masthead-ad,
-html[it-ads=subscribed_channels] *[target-id*='engagement-panel-ads'],
-html[it-ads=subscribed_channels] .ytd-ad-slot-renderer,
-html[it-ads=subscribed_channels] yt-mealbar-promo-renderer,
-html[it-ads=subscribed_channels] #player .ytp-ad-image-overlay,
-html[it-ads=subscribed_channels] #player .video-ads .ytp-ad-player-overlay-flyout-cta,
-html[it-ads=subscribed_channels] #player .ytp-ad-module .ytp-ad-player-overlay-flyout-cta,
-html[it-ads=block_all] #related #player-ads,
-html[it-ads=block_all] #masthead-ad,
-html[it-ads=block_all] *[target-id*='engagement-panel-ads'],
-html[it-ads=block_all] .ytd-ad-slot-renderer,
-html[it-ads=block_all] yt-mealbar-promo-renderer,
-html[it-ads=block_all] #player .ytp-ad-image-overlay,
-html[it-ads=block_all] #player .video-ads .ytp-ad-player-overlay-flyout-cta,
-html[it-ads=block_all] #player .ytp-ad-module .ytp-ad-player-overlay-flyout-cta{
+html[it-hide_banner_ads=true] #related #player-ads,
+html[it-hide_banner_ads=true] #masthead-ad,
+html[it-hide_banner_ads=true] *[target-id*='engagement-panel-ads'],
+html[it-hide_banner_ads=true] .ytd-ad-slot-renderer,
+html[it-hide_banner_ads=true] yt-mealbar-promo-renderer,
+html[it-hide_banner_ads=true] #player .ytp-ad-image-overlay,
+html[it-hide_banner_ads=true] #player .video-ads .ytp-ad-player-overlay-flyout-cta,
+html[it-hide_banner_ads=true] #player .ytp-ad-module .ytp-ad-player-overlay-flyout-cta {
 	display: none !important;
 }
-
 /*
-html[it-ads=subscribed_channels] #player .video-ads,
-html[it-ads=subscribed_channels] #player .ytp-ad-module,
 html[it-ads=block_all] #player .video-ads,
 html[it-ads=block_all] #player .ytp-ad-module {
 	opacity: 0.0001 !important;
 }
-
 html[it-ads=subscribed_channels] #player .ytp-ad-preview-image,
 html[it-ads=block_all] #player .ytp-ad-preview-image,
-html[it-ads=subscribed_channels] #player .ytp-ad-skip-button-container,
 html[it-ads=block_all] #player .ytp-ad-skip-button-container {
 	opacity: 0.5 !important;
 }
@@ -90,10 +75,17 @@ html[it-ads=block_all] #player .ytp-ad-skip-button-container {
 /*------------------------------------------------------------------------------
 4.3 MINIPLAYER
 ------------------------------------------------------------------------------*/
-
 /*-----------------------------------------------------------------------------
 # POSITION & SIZE
 -----------------------------------------------------------------------------*/
+
+/* Fix: Ensure custom mini-player stays above page content (description, comments) */
+
+html[it-mini-player="true"] #player-container,
+html[it-mini-player="true"] #full-bleed-container {
+    z-index: 2005 !important;
+}
+
 .it-mini-player {
 	position: fixed !important;
 	z-index: 2006 !important;
@@ -121,7 +113,6 @@ html[it-ads=block_all] #player .ytp-ad-skip-button-container {
 	width: 100% !important;
 	height: 100% !important;
 }
-
 /*-----------------------------------------------------------------------------
 # DRAGGING
 -----------------------------------------------------------------------------*/
@@ -191,8 +182,6 @@ html[it-mini-player-cursor='sw-resize']::after {
 html[it-mini-player-cursor='nw-resize']::after {
 	cursor: nw-resize;
 }
-
-
 /*------------------------------------------------------------------------------
 #
 ------------------------------------------------------------------------------*/
@@ -212,16 +201,27 @@ html[it-player-fit-to-win-button=true][data-page-type=video] #ftw-icon path {
 }
 .it-player-button {
 	position: relative !important;
-	display: flex !important;
-	min-width: 40px !important;
+	display: inline-flex !important;
+	width: 36px !important;
+	height: 36px !important;
 	padding: 0 !important;
 	justify-content: center !important;
 	align-items: center !important;
+	vertical-align: middle !important;
+	box-sizing: border-box !important;
+	flex: 0 0 36px !important;
+	align-self: center !important;
+	margin: 0 6px !important;
+	background: rgba(0, 0, 0, 0.3) !important;
+	border-radius: 50% !important;
 }
 
 .it-player-button>svg {
-	width: 56% !important;
-	height: auto !important;
+	display: block !important;
+	width: calc(100% - 6px) !important;
+	height: calc(100% - 6px) !important;
+	margin: 0 !important;
+	transform: none !important;
 	fill: #fff;
 }
 
@@ -266,6 +266,26 @@ body.no-scroll .it-player-button--tooltip {
 	fill: #f00;
 }
 
+/*------------------------------------------------------------------------------
+5.2 COPY VIDEO ID
+------------------------------------------------------------------------------*/
+.it-playlist-copy-video-id {
+	width: 40px;
+	height: 40px;
+	cursor: pointer;
+	border: none;
+	outline: none;
+	background: none;
+	fill: var(--yt-spec-icon-inactive);
+	align-self: center;
+}
+  
+.it-playlist-copy-video-id:hover::after {
+	content: attr(data-tooltip);
+	transform: translateX(-50%);
+	color: var(--paper-tooltip-text-color, white);
+	background-color: var(--paper-tooltip-background, #616161);
+}
 
 /*------------------------------------------------------------------------------
 6.0 CHANNEL
@@ -683,6 +703,7 @@ html:not([data-page-type=channel]) .it-blocklisted-channel:hover ytd-thumbnail {
 	color: var(--paper-tooltip-text-color, white);
 	border-radius: 2px;
 	background-color: var(--paper-tooltip-background, #616161);
+	z-index: 1002;
 }
 
 /*------------------------------------------------------------------------------
@@ -766,6 +787,7 @@ html[it-theme=black][data-system-color-scheme=light][it-schedule=system_peferenc
 	--yt-spec-selected-nav-text: #aaa !important;
 	--yt-spec-themed-blue: #065fd4 !important;
 	--yt-spec-themed-green: #107516 !important;
+	--yt-frosted-glass-desktop: #000000cc !important;
 	background-color: var(--yt-spec-base-background)!important;
 }
 
@@ -999,6 +1021,7 @@ html[it-theme=dawn][data-system-color-scheme=light][it-schedule=system_peference
 	--yt-spec-selected-nav-text: rgb(255, 255, 255) !important;
 	--yt-spec-themed-blue: #065fd4 !important;
 	--yt-spec-themed-green: #107516 !important;
+	--yt-frosted-glass-desktop: #773344cc !important;
 	background-color: var(--yt-spec-base-background)!important;
 }
 
@@ -1235,6 +1258,7 @@ html[it-theme=desert][data-system-color-scheme=light][it-schedule=system_peferen
 	--yt-spec-selected-nav-text: #555 !important;
 	--yt-spec-themed-blue: #065fd4 !important;
 	--yt-spec-themed-green: #107516 !important;
+	--yt-frosted-glass-desktop: #faf9f9cc !important;
 	background-color: var(--yt-spec-base-background)!important;
 }
 
@@ -1456,6 +1480,7 @@ html[it-theme=night][data-system-color-scheme=light][it-schedule=system_peferenc
 	--yt-spec-selected-nav-text: #fff !important;
 	--yt-spec-themed-blue: #065fd4 !important;
 	--yt-spec-themed-green: #107516 !important;
+	--yt-frosted-glass-desktop: #003459cc !important;
 	background-color: var(--yt-spec-base-background)!important;
 }
 
@@ -1691,6 +1716,7 @@ html[it-theme=plain][data-system-color-scheme=light][it-schedule=system_peferenc
 	--yt-spec-selected-nav-text: #666 !important;
 	--yt-spec-themed-blue: #065fd4 !important;
 	--yt-spec-themed-green: #107516 !important;
+	--yt-frosted-glass-desktop: #d3e1c6cc !important;
 	background-color: var(--yt-spec-base-background)!important;
 }
 
@@ -1922,6 +1948,7 @@ html[it-theme=sunset][data-system-color-scheme=light][it-schedule=system_peferen
 	--yt-spec-selected-nav-text: #fff !important;
 	--yt-spec-themed-blue: #065fd4 !important;
 	--yt-spec-themed-green: #107516 !important;
+	--yt-frosted-glass-desktop: #283567cc !important;
 	background-color: var(--yt-spec-base-background)!important;
 }
 
@@ -2131,13 +2158,44 @@ html .yt-spec-button-shape-next--mono.yt-spec-button-shape-next--filled {
 	background-color: var(--yt-spec-text-primary);
 }
 
-/*override bell and thumbs up icons hardcoded colors inside SVG data*/
-/*bell icon*/
-html .yt-spec-button-shape-next__icon ytd-lottie-player svg path[fill-opacity="1"] {
-	fill: var(--yt-spec-text-primary);
+/* Dark Mode + Fullscreen */
+html[dark] ytd-watch-flexy[fullscreen] .yt-spec-button-shape-next__icon ytd-lottie-player svg path[fill-opacity="1"] {
+    fill: var(--yt-spec-text-primary);
 }
 
-/*thumbs up icon*/
-html .yt-spec-button-shape-next__icon ytd-lottie-player svg path[fill-opacity="0"] {
+/* Light Mode + Fullscreen */
+html:not([dark])[it-theme="default"] ytd-watch-flexy[fullscreen] .yt-spec-button-shape-next__icon ytd-lottie-player svg path[fill-opacity="1"] {
+    fill: var(--yt-spec-text-primary-inverse);
+}
+
+/* Like button splash effect light mode */
+html:not([dark])[it-theme="default"] .yt-spec-button-shape-next__icon ytd-lottie-player svg path[fill-opacity="0"] {
+	stroke: var(--yt-spec-text-primary-inverse);
+}
+
+/* Like button splash effect dark mode */
+html[dark] .yt-spec-button-shape-next__icon ytd-lottie-player svg path[fill-opacity="0"] {
 	stroke: var(--yt-spec-text-primary);
+}
+
+
+/* thumbnail sizes */
+html[it-thumbnail-size="small"] ytd-rich-grid-media,
+html[it-thumbnail-size="small"] ytd-grid-video-renderer,
+html[it-thumbnail-size="small"] ytd-thumbnail {
+    width: 90%;
+    max-width: 90%;
+}
+html[it-thumbnail-size="x-small"] ytd-rich-grid-media,
+html[it-thumbnail-size="x-small"] ytd-grid-video-renderer,
+html[it-thumbnail-size="x-small"] ytd-thumbnail {
+    width: 80%;
+    max-width: 80%;
+}
+
+/* needed to prevent grey area from appearing when thumbnails change size*/
+html[it-thumbnail-size="small"] ytd-rich-grid-media,
+html[it-thumbnail-size="x-small"] ytd-rich-grid-media {
+    margin-left: auto;
+    margin-right: auto;
 }

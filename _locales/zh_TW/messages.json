@@ -140,6 +140,9 @@
     "confirmationBeforeClosing": {
         "message": "關閉前先確認"
     },
+    "copyVideoId": {
+        "message": "複製影片 ID"
+    },
     "cores": {
         "message": "核心數"
     },

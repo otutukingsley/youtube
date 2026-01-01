@@ -107,7 +107,6 @@ ImprovedTube.showProgressBar = function () {
 		for (let i = 0, l = play_bars.length; i < l; i++) {
 			width += play_bars[i].offsetWidth;
 		}
-
 		const width_percent = width / 100;
 
 		for (let i = 0, l = play_bars.length; i < l; i++) {
@@ -156,18 +155,37 @@ ImprovedTube.formatSecond = function (rTime) {
 };
 
 ImprovedTube.playerRemainingDuration = function () {
-	var player = ImprovedTube.elements.player;
-	var rTime = ImprovedTube.formatSecond((player.getDuration() - player.getCurrentTime()).toFixed(0));
-	var element = document.querySelector(".ytp-time-remaining-duration");
-	if (!element) {
-		var label = document.createElement("span");
-		label.textContent = " (-" + rTime + ")";
-		label.className = "ytp-time-remaining-duration";
-		document.querySelector(".ytp-time-display").appendChild(label);
-	} else {
-		element.textContent = " (-" + rTime + ")";
+	const liveBadge = document.querySelector('button.ytp-live-badge.ytp-button.ytp-live-badge-is-livehead');
+	if (liveBadge) return;
+
+	const currentEl = document.querySelector('.ytp-time-current');
+	const durationEl = document.querySelector('.ytp-time-duration');
+
+	if (!currentEl || !durationEl) return;
+
+	const player = ImprovedTube.elements.player;
+	if (!player) return;
+
+	const currentTime = player.getCurrentTime();
+	const duration = player.getDuration();
+
+	if (!isFinite(duration) || !isFinite(currentTime) || duration <= 0) return;
+
+	const remainingSeconds = Math.max(0, duration - currentTime);
+	const rTime = ImprovedTube.formatSecond(Math.floor(remainingSeconds));
+	
+	if (!rTime || rTime.includes('NaN')) return;
+
+	if (!durationEl.dataset.itOriginal) {
+		durationEl.dataset.itOriginal = durationEl.textContent;
 	}
+
+	// Overwrite text 
+	durationEl.textContent =
+		durationEl.dataset.itOriginal + '  (-' + rTime + ')';
 };
+
+
 /*------------------------------------------------------------------------------
  Comments Sidebar Simple
 ------------------------------------------------------------------------------*/
@@ -339,6 +357,12 @@ ImprovedTube.hideTopProgressBar = function () {
 ImprovedTube.transcript = function (el) { if (ImprovedTube.storage.transcript === true) {
 	const available = el.querySelector('[target-id*=transcript][visibility*=HIDDEN]') || el.querySelector('[target-id*=transcript]')?.clientHeight;
 	if (available) {
+		if (!ImprovedTube.originalFocus) {ImprovedTube.originalFocus = HTMLElement.prototype.focus;}  // Backing up default method. Youtube doesn't use alternatives Element.prototype.scrollIntoView  window.scrollTo  window.scrollBy)
+		ImprovedTube.forbidFocus =  function (ms) { 
+			HTMLElement.prototype.focus = function() {console.log("Preventing YouTube's scripted scrolling for a moment."); }
+			if(document.hidden) ms = 3*ms;
+			setTimeout(function() { HTMLElement.prototype.focus = ImprovedTube.originalFocus; }, ms); 	// Restoring JS's "focus()" 
+		}
 		ImprovedTube.forbidFocus(2100);
 		const descriptionTranscript = el.querySelector('ytd-video-description-transcript-section-renderer button[aria-label]');
 		descriptionTranscript ? descriptionTranscript.click() : el.querySelector('[target-id*=transcript]')?.removeAttribute('visibility');
@@ -351,6 +375,12 @@ ImprovedTube.transcript = function (el) { if (ImprovedTube.storage.transcript ==
 ImprovedTube.chapters = function (el) { if (ImprovedTube.storage.chapters === true) {
 	const available = el.querySelector('[target-id*=chapters][visibility*=HIDDEN]') || el.querySelector('[target-id*=chapters]')?.clientHeight;
 	if (available) {
+		if (!ImprovedTube.originalFocus) { ImprovedTube.originalFocus = HTMLElement.prototype.focus;}  // Backing up default method. Youtube doesn't use alternatives Element.prototype.scrollIntoView  window.scrollTo  window.scrollBy)
+		ImprovedTube.forbidFocus =  function (ms) { 
+			HTMLElement.prototype.focus = function() {console.log("Preventing YouTube's scripted scrolling for a moment."); }
+			if(document.hidden) ms = 3*ms;
+			setTimeout(function() { HTMLElement.prototype.focus = ImprovedTube.originalFocus; }, ms); 	// Restoring JS's "focus()" 
+		}
 		ImprovedTube.forbidFocus(2100);
 		const modernChapters = el.querySelector('[modern-chapters] #navigation-button button[aria-label]');
 		modernChapters ? modernChapters.click() : el.querySelector('[target-id*=chapters]')?.removeAttribute('visibility');
@@ -389,8 +419,8 @@ ImprovedTube.improvedtubeYoutubeButtonsUnderPlayer = function () {
 		||  this.storage.description == "classic_expanded" || this.storage.description == "classic_hidden"  )
 	   {var section = document.querySelector('#flex.ytd-video-primary-info-renderer');}
    */
-		if (section && !section.querySelector('.improvedtube-player-button')) {
-			if (this.storage.below_player_loop !== false) {
+		if (section) {
+			if (this.storage.below_player_loop !== false && !document.querySelector('#it-below-player-loop')) {
 				var button = document.createElement('button'),
 					svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'),
 					path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -425,12 +455,13 @@ ImprovedTube.improvedtubeYoutubeButtonsUnderPlayer = function () {
 				svg.appendChild(path); 	button.appendChild(svg);
 				section.insertAdjacentElement('afterend', button)
 			}
-			if (this.storage.below_player_pip !== false) {
+			if (this.storage.below_player_pip !== false && !document.querySelector('#it-below-player-pip')) {
 				var button = document.createElement('button'),
 					svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'),
 					path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
 				button.className = 'improvedtube-player-button';
+				button.id = 'it-below-player-pip';
 				button.dataset.tooltip = 'PiP';
 				svg.style.opacity = '.64';
 				svg.setAttributeNS(null, 'viewBox', '0 0 24 24');
@@ -444,18 +475,78 @@ ImprovedTube.improvedtubeYoutubeButtonsUnderPlayer = function () {
 				section.insertAdjacentElement('afterend', button)
 			}
 
-			if (this.storage.below_player_screenshot !== false) {
+			if (this.storage.below_player_screenshot !== false && !document.querySelector('#it-below-player-screenshot')) {
 				var button = document.createElement('button'),
 					svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'),
 					path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
 				button.className = 'improvedtube-player-button';
+				button.id = 'it-below-player-screenshot';
 				button.dataset.tooltip = 'Screenshot';
 				svg.style.opacity = '.55';
 				svg.setAttributeNS(null, 'viewBox', '0 0 24 24');
 				path.setAttributeNS(null, 'd', 'M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z');
 
 				button.onclick = ImprovedTube.screenshot;
+
+				svg.appendChild(path);	button.appendChild(svg);
+				section.insertAdjacentElement('afterend', button)
+			}
+
+			if (this.storage.below_player_keyscene !== false && !document.querySelector('#it-below-player-keyscene')) {
+				var button = document.createElement('button'),
+				svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'),
+				g = document.createElementNS('http://www.w3.org/2000/svg', 'g'),
+				path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+				button.className = 'improvedtube-player-button';
+				button.id = 'it-below-player-keyscene';
+				button.style.marginRight = '-0.2px';
+				button.dataset.tooltip = 'Key Scene';
+				svg.style.opacity = '.55';
+				svg.setAttributeNS(null, 'viewBox', '0 0 24 24');
+				g.setAttributeNS(null, 'transform', 'translate(5, 0)');				
+				path.setAttributeNS(null, 'd', 'M13 2 L3 14 H10 L8 22 L20 10 H13 L15 2 Z');
+
+				button.onclick = ImprovedTube.jumpToKeyScene;
+
+				g.appendChild(path);
+				svg.appendChild(path);	
+				button.appendChild(svg);
+				if (this.storage.below_player_screenshot !== false) {
+					const screenshotButton = document.querySelector('[data-tooltip="Screenshot"]');
+					screenshotButton?.parentElement?.insertBefore(button, screenshotButton);
+				} else { section.insertAdjacentElement('afterend', button) }
+			}
+
+			let copyVideoUrlButton = this.storage.copy_video_url === true;
+
+			if (this.storage.copy_video_id === true && !document.querySelector('#it-below-player-copy-video-id')) {
+				var button = document.createElement('button'),
+					svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'),
+					path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+				button.className = 'improvedtube-player-button';
+				button.id = 'it-below-player-copy-video-id';
+				button.dataset.tooltip = 'CopyVideoId';
+				svg.style.opacity = '.5';
+				svg.setAttributeNS(null, 'viewBox', '0 0 24 24');
+				path.setAttributeNS(null, 'd', 'M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z');
+				button.onclick = function () {
+					svg.style.opacity = '1';
+					const videoURL = ImprovedTube.elements.player?.getVideoUrl();
+					if (copyVideoUrlButton) {
+						navigator.clipboard.writeText(videoURL);
+					} else {
+						const videoId = videoURL.match(ImprovedTube.regex.video_id)?.[1];
+						navigator.clipboard.writeText(videoId);
+					}					
+					button.dataset.tooltip = 'Copied!';
+					setTimeout(function() {
+						button.dataset.tooltip = 'CopyVideoID';
+						svg.style.opacity = '.5';
+					}, 500);
+				}
 
 				svg.appendChild(path);	button.appendChild(svg);
 				section.insertAdjacentElement('afterend', button)
@@ -468,6 +559,12 @@ ImprovedTube.improvedtubeYoutubeButtonsUnderPlayer = function () {
 ------------------------------------------------------------------------------*/
 ImprovedTube.expandDescription = function (el) {
 	if (this.storage.description === "expanded") {
+		if (!ImprovedTube.originalFocus) { ImprovedTube.originalFocus = HTMLElement.prototype.focus;}  // Backing up default method. Youtube doesn't use alternatives Element.prototype.scrollIntoView  window.scrollTo  window.scrollBy)
+		ImprovedTube.forbidFocus =  function (ms) { 
+			HTMLElement.prototype.focus = function() {console.log("Preventing YouTube's scripted scrolling for a moment."); }
+			if(document.hidden) ms = 3*ms;
+			setTimeout(function() { HTMLElement.prototype.focus = ImprovedTube.originalFocus; }, ms); 	// Restoring JS's "focus()" 
+		}
 		if (el) { 
 			ImprovedTube.forbidFocus(2100); // setTimeout(function () {ImprovedTube.elements.player.focus();}, 2500);  
 			el.click();
@@ -524,6 +621,84 @@ ImprovedTube.dayOfWeek = function () {
 			} // else { element.textContent = days[tempDate.getDay() + 1] + ", "; }
 		}, 4321);
 	}
+};
+/*------------------------------------------------------------------------------
+ SHOW EXACT UPLOAD DATE
+------------------------------------------------------------------------------*/
+// ImprovedTube.exactUploadDate = function () {
+// 	if(this.exact_date==true && this.elements.yt_channel_link) {
+// 		// var xhr = new XMLHttpRequest(),
+// 		// 	key = this.storage["google-api-key"] || ImprovedTube.defaultApiKey,
+// 		// 	id = this.getParam(location.href.slice(location.href.indexOf("?") + 1), "v");
+// 		// xhr.open("GET", "https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + id + "&key=" + key, false);
+// 		// xhr.send();
+// 		// if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+// 		// 	var response = JSON.parse(xhr.responseText);
+// 		// 	var date = response.items[0].snippet.publishedA;
+// 		// 	var element = ImprovedTube.elements.exact_upload_date || document.createElement("div");
+// 		// 	ImprovedTube.empty(element);
+// 		// 	element.appendChild(document.createTextNode("• " + date.toLocaleDateString()));
+// 		// 	element.className = "it-exact-upload-date";
+// 		// 	ImprovedTube.elements.exact_upload_date = element;
+// 		// 	document.querySelector("#info #info-text").appendChild(element);
+// 		// }
+// 		var xhr = new XMLHttpRequest(),
+// 			key = this.storage["google-api-key"] || ImprovedTube.defaultApiKey,
+			
+// 			id = this.getParam(location.href.slice(location.href.indexOf("?") + 1), "v");
+// 		xhr.addEventListener("load", function () {
+// 			var response = JSON.parse(this.responseText);
+// 				element = ImprovedTube.elements.exact_date || document.createElement("div");
+
+// 			ImprovedTube.empty(element);
+
+// 			if (response.error) {
+// 				element.appendChild(document.createTextNode("• Error: " + response.error.code));
+// 			} else {
+// 				element.appendChild(document.createTextNode("• " + response.items[0].snippet.publishedAt));
+// 			}
+
+// 			element.className = "it-channel-exact-upload-date";
+
+// 			ImprovedTube.elements.exact_date = element;
+
+// 			document.querySelector("#info #info-text").appendChild(element);
+// 		});
+
+// 		xhr.open("GET", "https://www.googleapis.com/youtube/v3/videos?part=snippet&id=" + id + "&key=" + key, true);
+// 		xhr.send();
+// 		console.log("exact date toggle on")
+// 	}
+// 	console.log("exact date tesst")
+// };
+ImprovedTube.exactUploadDate = function () {
+    if (this.storage.exact_date === true) {
+        const xhr = new XMLHttpRequest();
+        const key = this.storage["google-api-key"] || ImprovedTube.defaultApiKey;
+        const id = this.getParam(location.href.slice(location.href.indexOf("?") + 1), "v");
+
+        xhr.addEventListener("load", function () {
+            const response = JSON.parse(this.responseText);
+            const element = ImprovedTube.elements.exact_date || document.createElement("div");
+
+            ImprovedTube.empty(element);
+
+            if (response.error) {
+                element.appendChild(document.createTextNode(`• Error: ${response.error.code}`));
+            } else {
+                const publishedDate = new Date(response.items[0].snippet.publishedAt);
+                element.appendChild(document.createTextNode(`• ${publishedDate.toLocaleDateString()}`));
+            }
+
+            element.className = "it-channel-exact-upload-date";
+            ImprovedTube.elements.exact_date = element;
+            document.querySelector("#info #info-text").appendChild(element);
+        });
+
+        xhr.open("GET", `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${id}&key=${key}`, true);
+        xhr.send();
+        // console.log("exact date toggle on");
+    }
 };
 /*------------------------------------------------------------------------------
  HOW LONG AGO THE VIDEO WAS UPLOADED
@@ -686,3 +861,56 @@ if (ImprovedTube.storage.header_transparent2 === true) {
 		}
 	});
 }
+
+/*------------------------------------------------------------------------------
+REVERT THEATER MODE BUTTON SIZES
+------------------------------------------------------------------------------*/
+// sets variable condition based on player switch
+ImprovedTube.playerRevertTheaterButtonSize = function () {
+	if (ImprovedTube.storage.player_revert_theater_button_sizes === true) {
+		document.documentElement.setAttribute('it-revert-theater-button-size', 'true');
+	} else {
+		document.documentElement.removeAttribute('it-revert-theater-button-size');
+	}
+}
+
+// initializer
+ImprovedTube.playerRevertTheaterButtonSize();
+
+// call function on page load and on navigation
+(function() {
+    var run = function() { ImprovedTube.playerRevertTheaterButtonSize && ImprovedTube.playerRevertTheaterButtonSize(); };
+    document.addEventListener('yt-page-data-updated', run);
+    document.addEventListener('yt-navigate-finish', run);
+    window.addEventListener('load', run);
+    setTimeout(run, 2000); // fallback for late loads
+})();
+
+/*------------------------------------------------------------------------------
+DISABLE LIKES ANIMATION
+------------------------------------------------------------------------------*/
+if (ImprovedTube.storage.disable_likes_animation === true) {
+ImprovedTube.disableLikesAnimation = function () {
+        // Find all like counters with animation
+        var likeAnimated = document.querySelectorAll('yt-animated-rolling-number');
+        likeAnimated.forEach(function (el) {
+            // Replace with static number
+            var staticValue = el.getAttribute('value') || el.textContent;
+            if (staticValue) {
+                var span = document.createElement('span');
+                span.textContent = staticValue;
+                span.style.verticalAlign = 'baseline';
+                span.style.fontVariantNumeric = 'tabular-nums'; // align digits
+                el.replaceWith(span);
+            }
+        });
+    }
+// Call this on page load and on navigation
+(function() {
+    var run = function() { ImprovedTube.disableLikesAnimation && ImprovedTube.disableLikesAnimation(); };
+    document.addEventListener('yt-page-data-updated', run);
+    document.addEventListener('yt-navigate-finish', run);
+    window.addEventListener('load', run);
+    setTimeout(run, 2000); // fallback for late loads
+})();
+};

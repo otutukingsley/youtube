@@ -7,6 +7,7 @@
 # Hide annotations
 # Hide endscreen
 # Hide cards
+# Hide "Includes Paid Promotion"
 # Show cards on mouse hover
 # Hide "Scroll for details"
 # Player Size
@@ -15,6 +16,7 @@ html[it-ambient-lighting='false'] #cinematics {display: none !important;}
 /*--------------------------------------------------------------
 # ALWAYS SHOW PROGRESS BAR
 --------------------------------------------------------------*/
+
 
 html[it-always-show-progress-bar='true'] .html5-video-player:not(.it-mini-player).ytp-autohide .ytp-chrome-bottom {
 	opacity: 1 !important;
@@ -30,6 +32,28 @@ html[it-always-show-progress-bar='true'] .html5-video-player:not(.it-mini-player
 
 html[it-always-show-progress-bar='true'] .DesktopShortsPlayerControlsHostHideProgressBar {
     visibility: visible;
+}
+html[it-always-show-progress-bar='true'] .html5-video-player:not(.it-mini-player).ytp-autohide .ytp-chrome-bottom .ytp-scrubber-button {
+    display: none !important;
+}
+
+/*--------------------------------------------------------------
+# FIX: hide full control strip in native miniplayer
+--------------------------------------------------------------*/
+ytd-miniplayer .ytp-chrome-bottom,
+.html5-video-player.ytp-player-minimized .ytp-chrome-bottom,
+.html5-video-player.ytp-small-mode .ytp-chrome-bottom {
+	opacity: 0 !important;
+	pointer-events: none !important;
+}
+
+ytd-miniplayer .ytp-chrome-bottom .ytp-progress-bar-container,
+.html5-video-player.ytp-player-minimized .ytp-chrome-bottom .ytp-progress-bar-container,
+.html5-video-player.ytp-small-mode .ytp-chrome-bottom .ytp-progress-bar-container,
+ytd-miniplayer .ytp-chrome-bottom .ytp-scrubber-button,
+.html5-video-player.ytp-player-minimized .ytp-chrome-bottom .ytp-scrubber-button,
+.html5-video-player.ytp-small-mode .ytp-chrome-bottom .ytp-scrubber-button {
+	display: none !important;
 }
 
 /*--------------------------------------------------------------
@@ -161,6 +185,42 @@ html[it-player-transparent-background='true'] #movie_player video {
 --------------------------------------------------------------*/
 html[it-hide-video-title-fullScreen='true'] .ytp-title-text > a,
 /*--------------------------------------------------------------
+# YOUTUBE RETURN BUTTON IN FULLSCREEN
+--------------------------------------------------------------*/
+#it-youtube-return-button {
+	position: absolute !important;
+	top: 20px !important;
+	left: 20px !important;
+	z-index: 9999 !important;
+	background: rgba(0, 0, 0, 0.8) !important;
+	border: none !important;
+	border-radius: 4px !important;
+	padding: 8px !important;
+	cursor: pointer !important;
+	transition: all 0.2s ease !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 40px !important;
+	height: 40px !important;
+}
+
+#it-youtube-return-button:hover {
+	background: rgba(0, 0, 0, 0.9) !important;
+	transform: scale(1.1) !important;
+}
+
+#it-youtube-return-button svg {
+	width: 24px !important;
+	height: 24px !important;
+	fill: white !important;
+}
+
+.html5-video-player:not(.ytp-fullscreen) #it-youtube-return-button {
+	display: none !important;
+}
+
+/*--------------------------------------------------------------
 # SHADOW AROUND PLAYER BAR
 --------------------------------------------------------------*/
 html[it-hide-gradient-bottom='true'] .ytp-gradient-bottom,
@@ -178,6 +238,12 @@ html[it-player-miniplayer-button=true] .ytp-miniplayer-button,
 html[it-player-view-button=true] .ytp-size-button,
 html[it-player-screen-button=true] .ytp-fullscreen-button,
 html[it-player-remote-button=true] .ytp-remote-button,
+html[it-player-chaptertitle-button=true] .ytp-chapter-container {
+	display: none !important;
+}
+html[it-player-subtitlesLine-button=true] button.ytp-subtitles-button.ytp-button::after{
+    display: none;
+}
 /*--------------------------------------------------------------
 # HIDE ANNOTATIONS
 --------------------------------------------------------------*/
@@ -188,6 +254,7 @@ html[it-player-hide-annotations='true'] .annotation-shape,
 # HIDE ENDSCREEN
 --------------------------------------------------------------*/
 html[it-player-hide-endscreen='true'] .html5-endscreen,
+html[it-player-hide-endscreen='true'] .ytp-fullscreen-grid-stills-container,
 /*--------------------------------------------------------------
 # HIDE CARDS
 --------------------------------------------------------------*/
@@ -619,4 +686,99 @@ html[data-page-type=video][it-hide-top-loading-bar=true] #progress.style-scope.y
 html[data-page-type=video][it-hide-top-loading-bar=true] .ytp-load-progress,
 html[data-page-type=video][it-hide-top-loading-bar=true] .ytp-loading-bar {
     display: none !important;
+}
+
+/*--------------------------------------------------------------
+# HIDE PROGRESS BAR PREVIEW
+--------------------------------------------------------------*/
+html[data-page-type=video][it-hide-progress-preview='true'] .ytp-preview,
+html[data-page-type=video][it-hide-progress-preview='true'] .ytp-tooltip,
+html[data-page-type=video][it-hide-progress-preview='true'] .ytp-tooltip-bg,
+html[data-page-type=video][it-hide-progress-preview='true'] .ytp-tooltip-text,
+html[data-page-type=video][it-hide-progress-preview='true'] .ytp-tooltip-text-wrapper,
+html[data-page-type=video][it-hide-progress-preview='true'] .ytp-chapter-hover-container {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/*--------------------------------------------------------------
+# HIDE "SCROLL FOR DETAILS"
+--------------------------------------------------------------*/
+
+html[it-hide-scroll-for-details='true'] button.ytp-fullerscreen-edu-button {
+	display: none !important;
+}
+
+html[it-hide-scroll-for-details='true'] ytd-app[scrolling_] {
+	overflow: hidden !important;
+}
+
+/*--------------------------------------------------------------
+# HIDE Includes Paid Promotion
+--------------------------------------------------------------*/
+html[data-page-type=video][it-hide-includes-paid-promotion=true] .ytp-paid-content-overlay,
+html[data-page-type=home][it-hide-includes-paid-promotion=true] .YtmPaidContentOverlayLink,
+html[data-page-type=other][it-hide-includes-paid-promotion=true] .YtmPaidContentOverlayLink  {
+  display: none !important;
+}
+
+/*--------------------------------------------------------------
+# FIX FOR YOUTUBE'S NEW BIG PLAYER CONTROLS IN THEATER MODE
+--------------------------------------------------------------*/
+
+/* This targets the player only when YouTube applies the .ytp-big-mode class */
+html[it-revert-theater-button-size='true'] .html5-video-player.ytp-big-mode .ytp-chrome-bottom {
+    height: 51px !important;
+}
+
+html[it-revert-theater-button-size='true'] .html5-video-player.ytp-big-mode .ytp-chrome-controls {
+    height: 48px !important;
+}
+
+html[it-revert-theater-button-size='true'] .html5-video-player.ytp-big-mode .ytp-button {
+    width: 48px !important;
+    height: 48px !important;
+}
+
+html[it-revert-theater-button-size='true'] .html5-video-player.ytp-big-mode .ytp-menu .ytp-menuitem {
+    height: 48px !important;
+    line-height: 48px !important;
+}
+
+html[it-revert-theater-button-size='true'] .html5-video-player.ytp-big-mode .ytp-time-display {
+	height: 48px !important;
+	display: flex;
+	align-items: center;
+}
+
+html[it-revert-theater-button-size='true'] .html5-video-player.ytp-big-mode .ytp-time-duration, html[it-revert-theater-button-size='true'] .html5-video-player.ytp-big-mode .ytp-time-separator, html[it-revert-theater-button-size='true'] .html5-video-player.ytp-big-mode .ytp-time-current {
+	font-size: 13.0691px !important;
+}
+
+html[it-revert-theater-button-size='true'] .html5-video-player.ytp-big-mode .ytp-time-contents {
+	display: flex;
+	align-items: center;
+}
+/*------------------------------------------------------------------------------
+ALWAYS SHOW CONTROL BUTTONS
+------------------------------------------------------------------------------*/
+html[it-shorts-always-show-fullscreen=true] ytd-shorts-player-controls:not([is-ads-overlay]) #fullscreen-button-shape.ytd-shorts-player-controls {
+	display: flex !important;
+}
+html[it-shorts-always-show-captions=true] ytd-shorts-player-controls:not([is-ads-overlay]) #closed-captioning-button-container.ytd-shorts-player-controls {
+	display: flex !important;
+}
+
+/*--------------------------------------------------------------
+# HIDE PAUSE OVERLAY (BEZEL)
+--------------------------------------------------------------*/
+html[it-player-hide-pause-overlay='true'] .ytp-bezel-text-wrapper,
+html[it-player-hide-pause-overlay='true'] .ytp-bezel,
+html[it-player-hide-pause-overlay='true'] .ytp-bezel-text,
+html[it-player-hide-pause-overlay='true'] .ytp-pause-overlay {
+	display: none !important;
+	opacity: 0 !important;
+	visibility: hidden !important;
 }
